@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">FuelOnWheelsApp</string>
+    <string name="Mobile_Number"><font fgcolor="#000000">Mobile Number</font></string>
+    <string name="OTP"><font fgcolor="#000000">OTP</font></string>
+    <string name="didn_t_get_an_otp_resend">Didn\'t get an OTP? <b>Resend</b></string>
+</resources>
