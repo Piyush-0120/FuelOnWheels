@@ -184,6 +184,8 @@ public class SignInActivity extends AppCompatActivity {
                         String phone = firebaseAuth.getCurrentUser().getPhoneNumber();
                         Toast.makeText(SignInActivity.this, "Logged In as"+phone, Toast.LENGTH_SHORT).show();
                         // start profile activity
+                        // TODO : check the database and if profile already setup then start dashboard
+
                         Intent intent = new Intent(SignInActivity.this,DashboardActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
