@@ -52,6 +52,8 @@ dependencies {
 
     // Declare the dependency for the Realtime Database library
     implementation 'com.google.firebase:firebase-database'
+    //AppCheck SafetyNet
+    implementation 'com.google.firebase:firebase-appcheck-safetynet:16.0.0-beta03'
 
     implementation "androidx.browser:browser:1.3.0"
     implementation 'androidx.navigation:navigation-fragment:2.3.5'
