@@ -60,6 +60,7 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        firebaseAuth = FirebaseAuth.getInstance();
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -70,31 +71,30 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        firebaseAuth = FirebaseAuth.getInstance();
-        checkUserStatus();
-        Button button = getActivity().findViewById(R.id.settings_btn_signout);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                firebaseAuth.signOut();
-                checkUserStatus();
-            }
-        });
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        checkUserStatus(view);
+        Button button = view.findViewById(R.id.settings_btn_signout);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                firebaseAuth.signOut();
+                checkUserStatus(view);
+            }
+        });
+        return view;
     }
-    private void checkUserStatus() {
+    private void checkUserStatus(View view) {
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if(firebaseUser != null){
             //user is logged in
             String phone = firebaseUser.getPhoneNumber();
-            TextView textView = getActivity().findViewById(R.id.settings_tv_phone);
+            TextView textView = view.findViewById(R.id.settings_tv_phone);
             textView.setText(phone);
         }
         else {
