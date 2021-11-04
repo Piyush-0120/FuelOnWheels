@@ -13,6 +13,9 @@
         android:theme="@style/Theme.FuelOnWheelsApp"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".SetupProfile"
+            android:exported="false" />
+        <activity
             android:name=".DashboardActivity"
             android:exported="false" />
         <activity
