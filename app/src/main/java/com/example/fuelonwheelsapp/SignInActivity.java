@@ -51,7 +51,7 @@ public class SignInActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         if(firebaseAuth.getCurrentUser()!=null){
-            Intent intent = new Intent(SignInActivity.this,DashboardActivity.class);
+            Intent intent = new Intent(SignInActivity.this,SetupProfileActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
@@ -91,7 +91,7 @@ public class SignInActivity extends AppCompatActivity {
                 binding.signInBtnGetOtp.setEnabled(false);
                 binding.signInTvResend.setEnabled(true);
 
-                Toast.makeText(SignInActivity.this, "OTP sent to the above phone number", Toast.LENGTH_LONG).show();
+                Toast.makeText(SignInActivity.this, "OTP sent to +91 "+binding.signInEtPhoneNo.getText().toString(), Toast.LENGTH_LONG).show();
             }
         };
 
@@ -182,7 +182,7 @@ public class SignInActivity extends AppCompatActivity {
                         //successfully signed in
                         progressDialog.dismiss();
                         String phone = firebaseAuth.getCurrentUser().getPhoneNumber();
-                        Toast.makeText(SignInActivity.this, "Logged In as"+phone, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignInActivity.this, "Signed In as"+phone, Toast.LENGTH_SHORT).show();
                         // start profile activity
                         // TODO : check the database and if profile already setup then start dashboard
 
