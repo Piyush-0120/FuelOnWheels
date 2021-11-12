@@ -5,13 +5,13 @@
       <map>
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_dashboard.xml" value="0.264" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_main.xml" value="0.24010416666666667" />
-        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_setup_profile.xml" value="0.264" />
-        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_sign_in.xml" value="0.264" />
-        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_home.xml" value="0.4" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_sign_in.xml" value="0.1" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_home.xml" value="0.1983695652173913" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_profile.xml" value="0.1983695652173913" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_settings.xml" value="0.1983695652173913" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.2361111111111111" />
         <entry key="..\:/Users/sayan/AndroidStudioProjects/FuelOnWheels/app/src/main/res/layout/activity_dashboard.xml" value="0.176" />
+        <entry key="..\:/Users/sayan/AndroidStudioProjects/FuelOnWheels/app/src/main/res/layout/fragment_settings.xml" value="0.264" />
       </map>
     </option>
   </component>
