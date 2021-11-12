@@ -29,7 +29,7 @@ public class DashboardActivity extends AppCompatActivity {
     TableLayout deliveryDetails;
     TextView eta;
     private FOWViewModel viewModel;
-
+    TextView address;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +40,7 @@ public class DashboardActivity extends AppCompatActivity {
         deliveryDetails = findViewById(R.id.delivery_details);
         eta = findViewById(R.id.eta);
         viewModel = new ViewModelProvider(this).get(FOWViewModel.class);
-
+        address = findViewById(R.id.delivery_address);
         nextButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -65,6 +65,7 @@ public class DashboardActivity extends AppCompatActivity {
                                 homeState = 2;
                                 break;
                             case 2:
+                                address.setText(viewModel.getOrderLocation());
                                 nextButton.setVisibility(View.GONE);
                                 getSupportFragmentManager().beginTransaction()
                                         .setReorderingAllowed(true)
