@@ -130,9 +130,7 @@ public class SetupProfileActivity extends AppCompatActivity {
                         && user.getPhoneNo() != null
                         && user.getPhoneNo().length() > 0) {
                     //Toast.makeText(SetupProfileActivity.this, "" + user.getPhoneNo() + "," + user.getEmail(), Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(SetupProfileActivity.this, DashboardActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                    gotoDashboardActivity();
                 }
                 else
                 {
