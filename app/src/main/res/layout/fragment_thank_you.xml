@@ -1,27 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@color/colorSecondary"
+    android:gravity="center"
     tools:context=".ThankYouFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="340dp"
+        android:layout_height="500dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="11dp">
 
-    <TextView
-        android:id="@+id/thank_you_textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-medium"
-        android:text="@string/thank_you"
-        android:textAlignment="center"
-        android:textColor="@color/colorSecondary"
-        android:textSize="60sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:src="@drawable/blue_bg" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/thank_you_for_placing_your_order"
+            android:textSize="35sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="280dp"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="@string/you_will_shortly_receive_the_details_of_order_and_delivery_person_through_email_sms"
+            android:textSize="20sp" />
+    </androidx.cardview.widget.CardView>
+
+
+</LinearLayout>
