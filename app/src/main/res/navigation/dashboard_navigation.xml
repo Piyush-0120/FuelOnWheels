@@ -6,11 +6,6 @@
     app:startDestination="@id/homeFragment">
 
     <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.example.fuelonwheelsapp.HomeFragment"
-        android:label="fragment_home"
-        tools:layout="@layout/fragment_home" />
-    <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.fuelonwheelsapp.ProfileFragment"
         android:label="fragment_profile"
@@ -20,4 +15,9 @@
         android:name="com.example.fuelonwheelsapp.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.fuelonwheelsapp.HomeFragment"
+        android:label="fragment_maps"
+        tools:layout="@layout/fragment_home" />
 </navigation>
