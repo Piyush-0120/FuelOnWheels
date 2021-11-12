@@ -7,6 +7,8 @@
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_main.xml" value="0.24010416666666667" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_sign_in.xml" value="0.1" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_home.xml" value="0.1983695652173913" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_order.xml" value="0.23854166666666668" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_payment.xml" value="0.23854166666666668" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_profile.xml" value="0.1983695652173913" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_settings.xml" value="0.1983695652173913" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.2361111111111111" />
@@ -15,7 +17,7 @@
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_X" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_15" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

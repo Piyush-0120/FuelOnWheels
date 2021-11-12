@@ -79,7 +79,7 @@ public class DashboardActivity extends AppCompatActivity {
                                         nextButton.setVisibility(View.VISIBLE);
                                         getSupportFragmentManager().popBackStack("order_setup", FragmentManager.POP_BACK_STACK_INCLUSIVE);
                                     }
-                                }, 1500);
+                                }, 3000);
 
                                 homeState = 0;
                                 nextButton.setEnabled(false);

@@ -30,7 +30,7 @@ public class PaymentFragment extends Fragment {
     private String mParam2;
 
     private FOWViewModel viewModel;
-    TextView petrolXQuant, dieselXQuant;
+    TextView petrolXQuant, dieselXQuant,petrolPrice,dieselPrice,totalPrice;
     TableRow petrolRow, dieselRow;
 
     public PaymentFragment() {
@@ -76,14 +76,22 @@ public class PaymentFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+
         viewModel = new ViewModelProvider(requireActivity()).get(FOWViewModel.class);
         petrolXQuant = view.findViewById(R.id.petrol_x_quant);
         dieselXQuant = view.findViewById(R.id.diesel_x_quant);
         petrolRow = view.findViewById(R.id.petrol_row);
         dieselRow = view.findViewById(R.id.diesel_row);
+        petrolPrice = view.findViewById(R.id.petrol_price);
+        dieselPrice = view.findViewById(R.id.diesel_price);
+        totalPrice = view.findViewById(R.id.total_price);
 
         petrolXQuant.setText("Petrol x " + viewModel.getPetrolQuantInt());
+        petrolPrice.setText("Rs."+(viewModel.getPetrolQuantInt().intValue() * 100)+"/-");
         dieselXQuant.setText("Diesel x " + viewModel.getDieselQuantInt());
+        dieselPrice.setText("Rs."+(viewModel.getDieselQuantInt().intValue() * 94)+"/-");
+        totalPrice.setText("Rs."+(viewModel.getPetrolQuantInt().intValue()*100
+                +viewModel.getDieselQuantInt().intValue()*94+50)+"/-");
 
         petrolRow.setVisibility(View.VISIBLE);
         dieselRow.setVisibility(View.VISIBLE);
