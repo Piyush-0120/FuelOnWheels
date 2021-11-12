@@ -32,4 +32,6 @@
     <string name="cash_on_delivery">Cash On Delivery</string>
     <string name="upi">UPI</string>
     <string name="thank_you">Thank You</string>
+    <string name="you_will_shortly_receive_the_details_of_order_and_delivery_person_through_email_sms">You will shortly receive the details of order and delivery person through Email/SMS.</string>
+    <string name="thank_you_for_placing_your_order">Thank You for placing your Order!</string>
 </resources>
