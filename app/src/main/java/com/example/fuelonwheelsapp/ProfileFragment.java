@@ -66,21 +66,21 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
-//        ListView listView = view.findViewById(R.id.profile_menu);
-//        final ArrayList<String> arrayList = new ArrayList<String>();
-//        arrayList.add("Account");
-//        arrayList.add("Your Orders");
-//        arrayList.add("Payments");
-//        arrayList.add("About Us");
-//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1,arrayList);
-//        listView.setAdapter(arrayAdapter);
-//
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                Toast.makeText(getActivity(), arrayList.get(position), Toast.LENGTH_SHORT).show();
-//            }
-//        });
+        ListView listView = view.findViewById(R.id.profile_menu);
+        final ArrayList<String> arrayList = new ArrayList<String>();
+        arrayList.add("Account");
+        arrayList.add("Your Orders");
+        arrayList.add("Payments");
+        arrayList.add("About Us");
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1,arrayList);
+        listView.setAdapter(arrayAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getActivity(), arrayList.get(position), Toast.LENGTH_SHORT).show();
+            }
+        });
         return view;
     }
 }
