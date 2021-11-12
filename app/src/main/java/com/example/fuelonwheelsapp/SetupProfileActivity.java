@@ -2,6 +2,8 @@ package com.example.fuelonwheelsapp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -16,11 +18,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 public class SetupProfileActivity extends AppCompatActivity {
 
@@ -29,6 +28,8 @@ public class SetupProfileActivity extends AppCompatActivity {
     private FirebaseUser firebaseUser;
     private DatabaseReference databaseReference;
     private ProgressDialog progressDialog;
+    private UserViewModel userViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,37 +39,18 @@ public class SetupProfileActivity extends AppCompatActivity {
 
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
-
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+        //databaseReference = FirebaseDatabase.getInstance().getReference();
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
         //init progress dialog
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Please wait...");
         progressDialog.setCanceledOnTouchOutside(false);
 
-        if(firebaseUser!=null)
-        {
-            progressDialog.setMessage("Signing In");
-            progressDialog.show();
-
-            if(isProfileComplete()) {
-                progressDialog.dismiss();
-                Intent intent = new Intent(SetupProfileActivity.this, DashboardActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-            else{
-                progressDialog.dismiss();
-                setUpViews();
-                binding.setupBtnNext.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        checkValidations(); // save and send to Dashboard
-                    }
-                });
-            }
-
-        }
+        progressDialog.setMessage("Signing In");
+        progressDialog.show();
+        //isProfileComplete();
+        isProfileCompleteUsingLiveData();
 
     }
 
@@ -92,37 +74,36 @@ public class SetupProfileActivity extends AppCompatActivity {
             binding.setupEtEmail.requestFocus();
             return;
         }
-        saveUserDetails(fullName,email,phone);
+        User user = new User(fullName,email,phone);
+        saveUserDetails(user);
     }
 
-    private void saveUserDetails(String fullName, String email, String phone) {
-
+    private void saveUserDetails(User user) {
         progressDialog.setMessage("Saving details");
         progressDialog.show();
-        // saving to users node
-        String userId = firebaseUser.getUid();
-        User user = new User(fullName,email,phone);
-        databaseReference.child("users")
-                .child(userId)
-                .setValue(user)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        progressDialog.dismiss();
-                        //send to Dashboard Activity
-                        Intent intent = new Intent(SetupProfileActivity.this, DashboardActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progressDialog.dismiss();
-                        Toast.makeText(SetupProfileActivity.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-        progressDialog.dismiss();
+        userViewModel.saveUserDetailsAsProfile(user);
+        userViewModel.dataSavedSuccessfully.observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if(aBoolean)
+                {
+                    progressDialog.dismiss();
+                    gotoDashboardActivity();
+                    finish();
+                }
+                else{
+                    progressDialog.dismiss();
+                    Toast.makeText(SetupProfileActivity.this, "Some error occurred while saving profile", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+    }
+
+    private void gotoDashboardActivity() {
+        Intent intent = new Intent(SetupProfileActivity.this,DashboardActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
 
@@ -137,25 +118,35 @@ public class SetupProfileActivity extends AppCompatActivity {
             binding.setupEtEmail.setEnabled(false);
         }
     }
-
-    private boolean isProfileComplete() {
-        final Boolean[] flag = {false};
-        ValueEventListener userDetailListener = new ValueEventListener() {
+    private void isProfileCompleteUsingLiveData(){
+        userViewModel.getResponseAsUserProfile().observe(this, new Observer<User>() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                if(user != null && user.getFullName()!=null && user.getEmail()!=null && user.getPhoneNo()!=null){
-                    flag[0] = true;
+            public void onChanged(User user) {
+                progressDialog.dismiss();
+                if (user != null && user.getFullName() != null
+                        && user.getFullName().length() > 0
+                        && user.getEmail() != null
+                        && user.getEmail().length() > 0
+                        && user.getPhoneNo() != null
+                        && user.getPhoneNo().length() > 0) {
+                    //Toast.makeText(SetupProfileActivity.this, "" + user.getPhoneNo() + "," + user.getEmail(), Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(SetupProfileActivity.this, DashboardActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+                else
+                {
+                    binding.setupContainer.setVisibility(View.VISIBLE);
+                    setUpViews();
+                    binding.setupBtnNext.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            checkValidations(); // save and send to Dashboard
+                        }
+                    });
                 }
             }
+        });
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(SetupProfileActivity.this, ""+databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.w("ActivitySetupProfile", "loadPost:onCancelled", databaseError.toException());
-            }
-        };
-        databaseReference.child("users").child(firebaseUser.getUid()).addValueEventListener(userDetailListener);
-        return flag[0];
     }
 }
