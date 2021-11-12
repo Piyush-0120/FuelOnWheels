@@ -14,7 +14,7 @@ import com.google.firebase.appcheck.safetynet.SafetyNetAppCheckProviderFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static int SPLASH_SCREEN = 6000;
+    private static final int SPLASH_SCREEN = 5000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(MainActivity.this,SetupProfileActivity.class);
+                Intent intent = new Intent(MainActivity.this,SignInActivity.class);
                 startActivity(intent);
                 finish();
             }
