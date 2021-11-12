@@ -6,15 +6,23 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -33,8 +41,8 @@ public class SettingsFragment extends Fragment {
     private String mParam2;
 
     private FirebaseAuth firebaseAuth;
-
-
+    private DatabaseReference databaseReference;
+    private FirebaseUser firebaseUser;
     public SettingsFragment() {
         // Required empty public constructor
     }
@@ -61,6 +69,8 @@ public class SettingsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -83,27 +93,41 @@ public class SettingsFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ValueEventListener userDetailListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
+                };
+                databaseReference.child("users").child(firebaseUser.getUid()).removeEventListener(userDetailListener);
+
+
+//                FragmentManager fm = getActivity().getSupportFragmentManager();
+//                for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+//                    fm.popBackStack();
+//                }
                 firebaseAuth.signOut();
-                checkUserStatus(view);
+                Intent intent = new Intent(getContext(),SignInActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                // user has clicked SignOut button
+                //send him to SignIn page
+                //clear the stack;
+                //this will clear the back stack and displays no animation on the screen
+
             }
         });
         return view;
     }
     private void checkUserStatus(View view) {
-        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
         if(firebaseUser != null){
             //user is logged in
             String phone = firebaseUser.getPhoneNumber();
             TextView textView = view.findViewById(R.id.settings_tv_phone);
             textView.setText(phone);
-        }
-        else {
-            // user has clicked SignOut button
-            //send him to SignIn page
-            //clear the stack;
-            startActivity(new Intent(getActivity(),SignInActivity.class));
-            if(getActivity()!=null)
-                getActivity().finish();
         }
     }
 }

@@ -33,6 +33,9 @@
             android:value="@string/google_maps_key" />
 
         <activity
+            android:name=".SetupProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".DashboardActivity"
             android:exported="false" />
         <activity

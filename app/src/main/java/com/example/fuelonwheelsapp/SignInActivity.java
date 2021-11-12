@@ -14,10 +14,7 @@ import android.widget.Toast;
 import com.example.fuelonwheelsapp.databinding.ActivitySignInBinding;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseException;
-import com.google.firebase.appcheck.FirebaseAppCheck;
-import com.google.firebase.appcheck.safetynet.SafetyNetAppCheckProviderFactory;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthCredential;
@@ -52,14 +49,9 @@ public class SignInActivity extends AppCompatActivity {
         //not allowing resend first
         binding.signInTvResend.setEnabled(false);
 
-        //AppCheck
-        FirebaseApp.initializeApp(this);
-        FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
-        firebaseAppCheck.installAppCheckProviderFactory(SafetyNetAppCheckProviderFactory.getInstance());
-
         firebaseAuth = FirebaseAuth.getInstance();
         if(firebaseAuth.getCurrentUser()!=null){
-            Intent intent = new Intent(SignInActivity.this,DashboardActivity.class);
+            Intent intent = new Intent(SignInActivity.this,SetupProfileActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
@@ -99,7 +91,7 @@ public class SignInActivity extends AppCompatActivity {
                 binding.signInBtnGetOtp.setEnabled(false);
                 binding.signInTvResend.setEnabled(true);
 
-                Toast.makeText(SignInActivity.this, "OTP sent to the above phone number", Toast.LENGTH_LONG).show();
+                Toast.makeText(SignInActivity.this, "OTP sent to +91 "+binding.signInEtPhoneNo.getText().toString(), Toast.LENGTH_LONG).show();
             }
         };
 
@@ -190,11 +182,11 @@ public class SignInActivity extends AppCompatActivity {
                         //successfully signed in
                         progressDialog.dismiss();
                         String phone = firebaseAuth.getCurrentUser().getPhoneNumber();
-                        Toast.makeText(SignInActivity.this, "Logged In as"+phone, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignInActivity.this, "Signed In as"+phone, Toast.LENGTH_SHORT).show();
                         // start profile activity
                         // TODO : check the database and if profile already setup then start dashboard
 
-                        Intent intent = new Intent(SignInActivity.this,DashboardActivity.class);
+                        Intent intent = new Intent(SignInActivity.this,SetupProfileActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                     }
