@@ -183,7 +183,7 @@
         android:id="@+id/next_button"
         android:layout_width="0dp"
         android:layout_height="75dp"
-        android:background="@drawable/ic_launcher_background"
+        android:background="@color/colorPrimary"
         android:fontFamily="sans-serif-condensed-medium"
         android:text="@string/order"
         android:textSize="20sp"
