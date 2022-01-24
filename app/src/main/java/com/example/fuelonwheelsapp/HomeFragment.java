@@ -1,27 +1,37 @@
 package com.example.fuelonwheelsapp;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.os.Handler;
+import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,9 +43,28 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.api.IMapController;
+import org.osmdroid.bonuspack.location.NominatimPOIProvider;
+import org.osmdroid.bonuspack.location.POI;
+import org.osmdroid.bonuspack.routing.OSRMRoadManager;
+import org.osmdroid.bonuspack.routing.Road;
+import org.osmdroid.bonuspack.routing.RoadManager;
+import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.tileprovider.tilesource.XYTileSource;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.Polyline;
+import org.osmdroid.views.overlay.ScaleBarOverlay;
+import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,24 +73,27 @@ import java.util.Locale;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment implements GoogleMap.OnMapLongClickListener {
+public class HomeFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String MY_PREFS_NAME = "UserData";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
     private FOWViewModel viewModel;
 
-    private GoogleMap mMap;
-
-    //private ActivityMapsBinding binding;
-    private LocationManager lm;
-    private LocationListener ll;
-    private Geocoder gc;
+    private static final String TAG = "HomeFragment.java";
+    private static String MY_USER_AGENT;
+    private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
+    private MapView map = null;
+    private Context ctx;
+    private IMapController mapController;
+    private LocationManager locationManager;
+    private Geocoder geocoder;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -86,178 +118,360 @@ public class HomeFragment extends Fragment implements GoogleMap.OnMapLongClickLi
     }
 
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        Log.d(TAG, "onAttach");
+
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        ctx = getContext();
+        Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
+        MY_USER_AGENT = ctx.getPackageName();
+        viewModel = new ViewModelProvider(requireActivity()).get(FOWViewModel.class);
+        locationManager = (LocationManager) requireActivity().getSystemService(Context.LOCATION_SERVICE);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode==1)
-        {
-            if(grantResults.length>1 && grantResults[0]== PackageManager.PERMISSION_GRANTED)
-            {
-                if(ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-                    lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,ll);
-                }
-            }
-            else {
-                Toast.makeText(getActivity(), "You need to allow Location to continue", Toast.LENGTH_SHORT).show();
-                ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            }
-        }
-    }
-
-
-
-
-    void generate_location(Location location)
-    {
-        mMap.clear();
-        LatLng user = new LatLng(location.getLatitude(),location.getLongitude());
-        //System.out.println(location.toString());
-        //Log.i("Info",location.toString());
-
-
-        if(getActivity() != null && isAdded()){
-
-            gc = new Geocoder(getActivity(), Locale.getDefault());
-            try {
-                List<Address> l = gc.getFromLocation(location.getLatitude(),location.getLongitude(),1);
-                if (l!=null && l.size()>0){
-                    Log.i("Location info",l.get(0).toString());
-                    String add="";
-
-                    if(l.get(0).getAddressLine(0)!=null)
-                        add+=l.get(0).getAddressLine(0);
-                    viewModel.setOrderLocation(add);
-                    Toast.makeText(getActivity(), add, Toast.LENGTH_SHORT).show();
-                    mMap.addMarker(new MarkerOptions().position(user).title(add).draggable(true));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user,15));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+        configureMap(view);
+        requestPermissionsIfNecessary(new String[]{
+                // if you need to show the current location, uncomment the line below
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                // WRITE_EXTERNAL_STORAGE is required in order to show the map
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        });
+        configureLocationManager();
         return view;
-
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onViewCreated");
         super.onViewCreated(view, savedInstanceState);
-        SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+    }
 
-        supportMapFragment.getMapAsync(new OnMapReadyCallback() {
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.d(TAG, "onActivityCreated");
+
+
+        viewModel.getRoad().observe(getViewLifecycleOwner(), new Observer<Road>() {
             @Override
-            public void onMapReady(GoogleMap googleMap) {
-                mMap = googleMap;
-                viewModel = new ViewModelProvider(getActivity()).get(FOWViewModel.class);
-                //mMap.setOnMapLongClickListener((GoogleMap.OnMapLongClickListener) getActivity());
-                //mMap.setOnMarkerDragListener((GoogleMap.OnMarkerDragListener) getActivity());
-                mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-                    @Override
-                    public void onMarkerDragStart(Marker marker) {
-                        Log.i("Start","Mp");
-                    }
+            public void onChanged(Road road) {
+                Log.d(TAG, "In viewModel.getRoad().observe");
+                if (road != null) {
+                    Log.d(TAG, "Road variable is NOT null");
+                    Drawable poiIcon = getResources().getDrawable(R.drawable.marker_default_focused_base);
+                    Marker poiMarker = new Marker(map);
+                    poiMarker.setTitle("Fuel");
+                    poiMarker.setSnippet(viewModel.getFuelLocation());
+                    poiMarker.setPosition(viewModel.getFuelCoordinates().getValue());
+                    poiMarker.setIcon(poiIcon);
+                    poiMarker.setId("fuelMarker");
+                    map.getOverlays().add(poiMarker);
+                    Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
+                    roadOverlay.setId("road");
+                    roadOverlay.getOutlinePaint().setStrokeWidth(30.0f);
+                    map.getOverlays().add(roadOverlay);
+                    map.invalidate();
+                } else {
+                    Log.d(TAG, "Road variable is null");
+                }
+            }
+        });
 
-                    @Override
-                    public void onMarkerDrag(Marker marker) {
-                        Log.i("ON","Mp");
-                    }
-
-                    @Override
-                    public void onMarkerDragEnd(Marker marker) {
-                        Log.i("End",marker.getPosition().toString());
-                        LatLng dragLoc = marker.getPosition();
-                        System.out.println("In Marker");
+        viewModel.getDelivered().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if (aBoolean != null && aBoolean) {
+                    for (int i = 0; i < map.getOverlays().size(); i++) {
                         try {
-                            List<Address> l = gc.getFromLocation(dragLoc.latitude,dragLoc.longitude,1);
-                            if (l!=null && l.size()>0){
-                                Log.i("Location end",l.get(0).toString());
-                                String add="";
-
-                                if(l.get(0).getAddressLine(0)!=null)
-                                    add+=l.get(0).getAddressLine(0);
-                                viewModel.setOrderLocation(add);
-                                Toast.makeText(getActivity(), add, Toast.LENGTH_SHORT).show();
-                                marker.setTitle(add);
+                            Overlay overlay = map.getOverlays().get(i);
+                            if (overlay instanceof Polyline && ((Polyline) overlay).getId().equals("road")) {
+                                Log.d(TAG, "road:" + i);
+                                map.getOverlays().remove(overlay);
+                                map.invalidate();
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
-                });
-
-                lm = (LocationManager) requireActivity().getSystemService(Context.LOCATION_SERVICE);
-
-                ll = new LocationListener() {
-                    @Override
-                    public void onLocationChanged(@NonNull Location location) {
-                        generate_location(location);//live first location
-//                        lm.removeUpdates(ll);
-//                        lm=null;
-                        lm.removeUpdates(this);
-                    }
-
-                    @Override
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                    }
-
-                    @Override
-                    public void onProviderEnabled(@NonNull String provider) {
-
-                    }
-
-                    @Override
-                    public void onProviderDisabled(@NonNull String provider) {
-
-                    }
-                };
-                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    //requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-                    ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                } else {
-                    if( !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ) {
-                        new AlertDialog.Builder(requireContext())
-                                .setTitle("GPS not found")  // GPS not found
-                                .setMessage("Enable GPS") // Want to enable?
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        requireActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                                    }
-                                })
-                                .setNegativeButton("No", null)
-                                .show();
-                    }
-                    lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, ll);
-                    Location lKnown = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                    if(lKnown != null){
-                        generate_location(lKnown);
+                    for (int i = 0; i < map.getOverlays().size(); i++) {
+                        try {
+                            Overlay overlay = map.getOverlays().get(i);
+                            if (overlay instanceof Marker && ((Marker) overlay).getId().equals("fuelMarker")) {
+                                Log.d(TAG, "fuelMarker:" + i);
+                                map.getOverlays().remove(overlay);
+                                map.invalidate();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
         });
 
+    }
+
+    private final LocationListener locationListener = new LocationListener() {
+
+        @Override
+        public void onLocationChanged(Location location) {
+            // TODO Auto-generated method stub
+            updateLocation(location);
+            locationManager.removeUpdates(this);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            // TODO Auto-generated method stub
+
+        }
+
+    };
+
+    private void configureLocationManager() {
+        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            requestPermissionsIfNecessary(new String[]{
+                    // if you need to show the current location, uncomment the line below
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    // WRITE_EXTERNAL_STORAGE is required in order to show the map
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            });
+            return;
+        }
+
+        Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        if (lastKnownLocation == null) {
+            lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+        if(lastKnownLocation!=null){
+            updateLocation(lastKnownLocation);
+        }
+        else{
+            if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+            }
+            else{
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            }
+        }
+    }
+
+    private void updateLocation(Location loc) {
+        Log.d(TAG, "updateLocation: Updating the location here");
+        GeoPoint geoPoint = new GeoPoint(loc.getLatitude(),loc.getLongitude());
+        viewModel.setUserGeoPoint(geoPoint);
+        Marker startMarker = new Marker(map);
+        startMarker.setPosition(geoPoint);
+        startMarker.setId("userMarker");
+        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        startMarker.setIcon(getResources().getDrawable(R.drawable.marker_default));
+        startMarker.setSnippet("My Location");
+        generateLocation(geoPoint,startMarker);
+
+    }
+
+    private void generateLocation(GeoPoint geoPoint, Marker startMarker) {
+
+        geocoder = new Geocoder(requireActivity(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(geoPoint.getLatitude(),geoPoint.getLongitude(),1);
+            if (addresses!=null && addresses.size()>0){
+                Log.i("Location info",addresses.get(0).toString());
+                String add="";
+
+                if(addresses.get(0).getAddressLine(0)!=null)
+                    add+=addresses.get(0).getAddressLine(0);
+                viewModel.setOrderLocation(add);
+                viewModel.setUserGeoPoint(geoPoint);
+                mapController.setCenter(geoPoint);
+                mapController.animateTo(geoPoint,13.0, 1L);
+
+                SharedPreferences.Editor editor = requireActivity().getSharedPreferences(MY_PREFS_NAME, Context.MODE_PRIVATE).edit();
+                editor.putString("userLatitude", String.valueOf(geoPoint.getLatitude()));
+                editor.putString("userLongitude", String.valueOf(geoPoint.getLatitude()));
+                editor.apply();
+
+                Toast.makeText(requireActivity(), add, Toast.LENGTH_SHORT).show();
+                startMarker.setSubDescription(add);
+                startMarker.setImage(getResources().getDrawable(R.drawable.osm_ic_follow_me));
+                map.getOverlays().add(startMarker);
+                map.invalidate();
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        ArrayList<String> permissionsToRequest = new ArrayList<>();
+        for (int i = 0; i < grantResults.length; i++) {
+            permissionsToRequest.add(permissions[i]);
+        }
+        if (permissionsToRequest.size() > 0) {
+            ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    permissionsToRequest.toArray(new String[0]),
+                    REQUEST_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+
+
+    private void requestPermissionsIfNecessary(String[] permissions) {
+        ArrayList<String> permissionsToRequest = new ArrayList<>();
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(requireActivity(), permission)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Permission is not granted
+                permissionsToRequest.add(permission);
+            }
+        }
+        if (permissionsToRequest.size() > 0) {
+            ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    permissionsToRequest.toArray(new String[0]),
+                    REQUEST_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+    private void configureMap(View view) {
+        map = (MapView) view.findViewById(R.id.map);
+        map.setTileSource(TileSourceFactory.MAPNIK);
+        //map.setTilesScaledToDpi(true);
+        final float scale = requireActivity().getResources().getDisplayMetrics().density;
+        //final int newScale = (int) (256 * scale);
+        String[] OSMSource = new String[2];
+        OSMSource[0] = "http://a.tile.openstreetmap.org/";
+        OSMSource[1] = "http://b.tile.openstreetmap.org/";
+        XYTileSource MapSource = new XYTileSource(
+                "OSM",
+                0,
+                40,
+                512,
+                ".png",
+                OSMSource
+        );
+        map.setTileSource(MapSource);
+        //map.setBuiltInZoomControls(true);
+        map.setMultiTouchControls(true);
+        mapController = map.getController();
+        RotationGestureOverlay mRotationGestureOverlay = new RotationGestureOverlay(map);
+        mRotationGestureOverlay.setEnabled(true);
+        map.getOverlays().add(mRotationGestureOverlay);
+        map.invalidate();
+        Log.d("HomeFragment.java","in configureMap()");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
+        Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
+        map.onResume();
+        // when we click home button again after ordering
+        try {
+            Log.d(TAG, "onResume: "+viewModel.getRoad().getValue());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(viewModel.getRoad().getValue()!=null && viewModel.getDelivered().getValue()!=null){
+            if(!viewModel.getDelivered().getValue()){
+                Log.d(TAG, "onActivityCreated: handle home click between order");
+                Drawable poiIcon = getResources().getDrawable(R.drawable.marker_default_focused_base);
+                Marker poiMarker = new Marker(map);
+                poiMarker.setTitle("Fuel");
+                poiMarker.setSnippet(viewModel.getFuelLocation());
+                poiMarker.setPosition(viewModel.getFuelCoordinates().getValue());
+                poiMarker.setIcon(poiIcon);
+                poiMarker.setId("fuelMarker");
+                map.getOverlays().add(poiMarker);
+                Polyline roadOverlay = RoadManager.buildRoadOverlay(viewModel.getRoad().getValue());
+                roadOverlay.setId("road");
+                roadOverlay.getOutlinePaint().setStrokeWidth(30.0f);
+                map.getOverlays().add(roadOverlay);
+                map.invalidate();
+            }
+        }
+
+        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            requestPermissionsIfNecessary(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    // WRITE_EXTERNAL_STORAGE is required in order to show the map
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            });
+            return;
+        }
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        }
+        else{
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        }
 
     }
 
     @Override
-    public void onMapLongClick(LatLng latLng) {
-        Log.i("Location Clicked",latLng.toString());
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG,"onPause");
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        Configuration.getInstance().save(ctx, prefs);
+        map.onPause();
+        locationManager.removeUpdates(locationListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG,"onStop");
     }
 }

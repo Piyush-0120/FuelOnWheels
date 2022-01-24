@@ -3,6 +3,7 @@ package com.example.fuelonwheelsapp;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -10,38 +11,78 @@ import androidx.navigation.NavDestination;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
+import android.Manifest;
+import android.app.Fragment;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
+
+import org.osmdroid.bonuspack.routing.Road;
+import org.osmdroid.util.GeoPoint;
+
+
+import java.util.Locale;
 
 public class DashboardActivity extends AppCompatActivity {
+    private static final int PERMISSION_REQUEST_ACCESS_COARSE_LOCATION = 2;
+    private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 3;
+    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 4;
+    private static final String TAG = "DashboardActivity.java";
 
-//    private FirebaseAuth firebaseAuth;
-
-    int homeState;
-    Button nextButton;
-    TableLayout deliveryDetails;
-    TextView eta;
+    private int homeState;
+    private Button nextButton;
+    private TableLayout deliveryDetails;
+    private TextView eta;
     private FOWViewModel viewModel;
-    TextView address;
+    private ProgressDialog progressDialog;
+    private View mLayout;
+    private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
+    private TextView address;
+    private TextView fueladdress;
+    private TextView dashboard_tv_distance;
+    private TextView delivering_to;
+    private String fullName;
+    private TextView deliveryCode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-
+        Intent intent = getIntent();
+        fullName = intent.getStringExtra("fullName");
         homeState = 0;
         nextButton = findViewById(R.id.next_button);
         deliveryDetails = findViewById(R.id.delivery_details);
+        delivering_to = findViewById(R.id.delivering_to);
         eta = findViewById(R.id.eta);
+        mLayout=findViewById(R.id.dashboard_main_layout);
+        dashboard_tv_distance=findViewById(R.id.dashboard_table_tv_distance);
+        deliveryCode=findViewById(R.id.delivery_code);
+        //init progress dialog
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Please wait...");
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.setMessage("Placing your Order");
+
         viewModel = new ViewModelProvider(this).get(FOWViewModel.class);
         address = findViewById(R.id.delivery_address);
-        nextButton.setOnClickListener(
+        fueladdress = findViewById(R.id.fuel_address);
+                nextButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -55,7 +96,7 @@ public class DashboardActivity extends AppCompatActivity {
                                 homeState = 1;
                                 break;
                             case 1:
-                                if(viewModel.getPetrolQuantInt().intValue()==0 && viewModel.getDieselQuantInt().intValue()==0)
+                                if(viewModel.getPetrolQuantInt() ==0 && viewModel.getDieselQuantInt() ==0)
                                     break;
                                 getSupportFragmentManager().beginTransaction()
                                         .setReorderingAllowed(true)
@@ -63,47 +104,97 @@ public class DashboardActivity extends AppCompatActivity {
                                         .addToBackStack("payment")
                                         .commit();
                                 homeState = 2;
+                                // TODO : Wait for getting nearest petrol pump
+                                // store latitude and longitude
+                                // find POI
+                                // get the nearest POI
+                                // store it in FOWViewModel
+                                // TODO : show route and petrol pump address
+                                //viewModel.setOrderPlaced(true);
                                 break;
                             case 2:
-                                address.setText(viewModel.getOrderLocation());
-                                nextButton.setVisibility(View.GONE);
-                                getSupportFragmentManager().beginTransaction()
-                                        .setReorderingAllowed(true)
-                                        .add(R.id.fragmentContainerView4, ThankYouFragment.class, null)
-                                        .addToBackStack("thank_you")
-                                        .commit();
-
-                                new Handler().postDelayed(new Runnable() {
+                                progressDialog.show();
+                                //findNearestFuel();
+                                viewModel.getResponseUsingCallback(getApplicationContext(),viewModel.getUserGeoPoint(), new OrderCallback() {
                                     @Override
-                                    public void run() {
-                                        nextButton.setVisibility(View.VISIBLE);
-                                        getSupportFragmentManager().popBackStack("order_setup", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                                    }
-                                }, 3000);
-
-                                homeState = 0;
-                                nextButton.setEnabled(false);
-                                deliveryDetails.setVisibility(View.VISIBLE);
-
-                                new CountDownTimer(10000, 1000) {
-                                    @Override
-                                    public void onTick(long l) {
-                                        updateTimer((int) l / 1000);
-                                    }
-                                    @Override
-                                    public void onFinish() {
-                                        eta.setText("Package Delivered");
-                                        new Handler().postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                deliveryDetails.setVisibility(View.GONE);
-                                                nextButton.setEnabled(true);
+                                    public void onResponse(Response response) {
+                                        progressDialog.dismiss();
+                                        if(response.exception==null && response.address!=null){
+                                            fueladdress.setText(response.address);
+                                            viewModel.setFuelCoordinates(response.fuelCoordinates);
+                                            viewModel.setFuelLocation(response.address);
+                                            viewModel.setRoad(response.road);
+                                            address.setText(viewModel.getOrderLocation());
+                                            delivering_to.setText(fullName);
+                                            deliveryCode.setText(response.orderId);
+                                            if(response.road!=null){
+                                                Log.d(TAG,"road is NOT null in "+TAG);
+                                                viewModel.setBuildRoad(true);
+                                                viewModel.setDelivered(false);
+                                                dashboard_tv_distance.setText(String.format(Locale.getDefault(),
+                                                        "%.2f km (%.2f minutes)",response.road.mLength,response.road.mDuration/60));
                                             }
-                                        }, 2000);
+                                            else{
+                                                Log.d(TAG,"road is null in "+TAG);
+                                            }
+                                            nextButton.setVisibility(View.GONE);
+                                            getSupportFragmentManager().beginTransaction()
+                                                    .setReorderingAllowed(true)
+                                                    .add(R.id.fragmentContainerView4, ThankYouFragment.class, null)
+                                                    .addToBackStack("thank_you")
+                                                    .commit();
+
+                                            new Handler().postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    nextButton.setVisibility(View.VISIBLE);
+                                                    getSupportFragmentManager().popBackStack("order_setup", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                                }
+                                            }, 3000);
+
+
+                                            homeState = 0;
+                                            nextButton.setEnabled(false);
+                                            deliveryDetails.setVisibility(View.VISIBLE);
+                                            Log.d(TAG,"executed before Counter");
+                                            new CountDownTimer(30000, 1000) {
+                                                @Override
+                                                public void onTick(long l) {
+                                                    updateTimer((int) l / 1000);
+                                                }
+                                                @Override
+                                                public void onFinish() {
+                                                    eta.setText("Package Delivered");
+                                                    new Handler().postDelayed(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            deliveryDetails.setVisibility(View.GONE);
+                                                            nextButton.setEnabled(true);
+                                                        }
+                                                    }, 2000);
+                                                }
+                                            }.start();
+                                        }
+                                        else{
+                                            Log.d(TAG,"fuel address is null");
+                                            String exception="Sorry! We encountered a problem.";
+                                            if(response.exception!=null)
+                                                exception=response.exception;
+                                            Toast.makeText(DashboardActivity.this, exception, Toast.LENGTH_SHORT).show();
+                                            new Handler().postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    nextButton.setVisibility(View.VISIBLE);
+                                                    getSupportFragmentManager().popBackStack("order_setup", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                                }
+                                            }, 1000);
+                                            homeState = 0;
+                                        }
                                     }
-                                }.start();
+                                });
                         }
                         updateNxtBtn();
+
                     }
                 }
         );
@@ -133,34 +224,136 @@ public class DashboardActivity extends AppCompatActivity {
                 });
             NavigationUI.setupWithNavController(bottomNavigationView,navController);
         }
-
-        /*
-        else {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, new HomeFragment()).commit();
-
-            bottomNavigationView.setSelectedItemId(R.id.homeFragment);
-            bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    Fragment fragment = null;
-                    switch (item.getItemId()) {
-                        case R.id.homeFragment:
-                            fragment = new HomeFragment();
-                            break;
-                        case R.id.profileFragment:
-                            fragment = new ProfileFragment();
-                            break;
-                        case R.id.settingsFragment:
-                            fragment = new SettingsFragment();
-                            break;
-                    }
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
-                    return true;
-                }
-            });
-        }
-         */
     }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+//                                           @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        switch (requestCode) {
+//            case PERMISSION_REQUEST_ACCESS_FINE_LOCATION:
+//                // If request is cancelled, the result arrays are empty.
+//                if (grantResults.length > 0 &&
+//                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    // Permission is granted. Continue the action or workflow
+//                    // in your app.
+//                }  else {
+//                    // Explain to the user that the feature is unavailable because
+//                    // the features requires a permission that the user has denied.
+//                    // At the same time, respect the user's decision. Don't link to
+//                    // system settings in an effort to convince the user to change
+//                    // their decision.
+//                    Snackbar.make(mLayout, "Location permission denied.",
+//                            Snackbar.LENGTH_SHORT)
+//                            .show();
+//                }
+//            case PERMISSION_REQUEST_ACCESS_COARSE_LOCATION:
+//                // If request is cancelled, the result arrays are empty.
+//                if (grantResults.length > 0 &&
+//                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    // Permission is granted. Continue the action or workflow
+//                    // in your app.
+//                }  else {
+//                    // Explain to the user that the feature is unavailable because
+//                    // the features requires a permission that the user has denied.
+//                    // At the same time, respect the user's decision. Don't link to
+//                    // system settings in an effort to convince the user to change
+//                    // their decision.
+//                    Snackbar.make(mLayout, "Location permission denied.",
+//                            Snackbar.LENGTH_SHORT)
+//                            .show();
+//                }
+//            case PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE:
+//                // If request is cancelled, the result arrays are empty.
+//                if (grantResults.length > 0 &&
+//                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    // Permission is granted. Continue the action or workflow
+//                    // in your app.
+//                }  else {
+//                    // Explain to the user that the feature is unavailable because
+//                    // the features requires a permission that the user has denied.
+//                    // At the same time, respect the user's decision. Don't link to
+//                    // system settings in an effort to convince the user to change
+//                    // their decision.
+//                    Snackbar.make(mLayout, "Permission write to external storage denied.",
+//                            Snackbar.LENGTH_SHORT)
+//                            .show();
+//                    Log.d("DashboardActivity.java","in else of External storage case");
+//                }
+//        }
+//        // Other 'case' lines to check for other
+//        // permissions this app might request.
+//    }
+
+    private void requestPermissions() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)) {
+            // Provide an additional rationale to the user if the permission was not granted
+            // and the user would benefit from additional context for the use of the permission.
+            // Display a SnackBar with cda button to request the missing permission.
+            Snackbar.make(mLayout, "Location permission required",
+                    Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Request the permission
+                    ActivityCompat.requestPermissions(DashboardActivity.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            PERMISSION_REQUEST_ACCESS_FINE_LOCATION);
+                }
+            }).show();
+
+        } else {
+            Snackbar.make(mLayout, "Location Unavailable", Snackbar.LENGTH_SHORT).show();
+            // Request the permission. The result will be received in onRequestPermissionResult().
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_ACCESS_COARSE_LOCATION);
+        }
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            // Provide an additional rationale to the user if the permission was not granted
+            // and the user would benefit from additional context for the use of the permission.
+            // Display a SnackBar with cda button to request the missing permission.
+            Snackbar.make(mLayout, "Location permission required",
+                    Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Request the permission
+                    ActivityCompat.requestPermissions(DashboardActivity.this,
+                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                            PERMISSION_REQUEST_ACCESS_COARSE_LOCATION);
+                }
+            }).show();
+
+        } else {
+            Snackbar.make(mLayout, "Location Unavailable", Snackbar.LENGTH_SHORT).show();
+            // Request the permission. The result will be received in onRequestPermissionResult().
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_ACCESS_COARSE_LOCATION);
+        }
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            // Provide an additional rationale to the user if the permission was not granted
+            // and the user would benefit from additional context for the use of the permission.
+            // Display a SnackBar with cda button to request the missing permission.
+            Snackbar.make(mLayout, "Write to external storage permission required",
+                    Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // Request the permission
+                    ActivityCompat.requestPermissions(DashboardActivity.this,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+                }
+            }).show();
+
+        } else {
+            Snackbar.make(mLayout, "Write to external storage unavailable", Snackbar.LENGTH_SHORT).show();
+            // Request the permission. The result will be received in onRequestPermissionResult().
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -174,7 +367,13 @@ public class DashboardActivity extends AppCompatActivity {
         int seconds = secondsLeft - (minutes * 60);
 
         String secondString = String.valueOf(seconds);
-
+        if(seconds==0){
+            viewModel.setDelivered(true);
+            viewModel.setBuildRoad(false);
+            viewModel.setFuelCoordinates(null);
+            viewModel.setFuelLocation(null);
+            viewModel.setRoad(null);
+        }
         if(seconds < 10)
             secondString = "0" + secondString;
 
