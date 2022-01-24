@@ -29,6 +29,7 @@ public class SetupProfileActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private ProgressDialog progressDialog;
     private UserViewModel userViewModel;
+    private String fullNameOfUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +76,7 @@ public class SetupProfileActivity extends AppCompatActivity {
             return;
         }
         User user = new User(fullName,email,phone);
+        fullNameOfUser = fullName;
         saveUserDetails(user);
     }
 
@@ -103,6 +105,7 @@ public class SetupProfileActivity extends AppCompatActivity {
     private void gotoDashboardActivity() {
         Intent intent = new Intent(SetupProfileActivity.this,DashboardActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra("fullName",fullNameOfUser);
         startActivity(intent);
     }
 
@@ -130,6 +133,7 @@ public class SetupProfileActivity extends AppCompatActivity {
                         && user.getPhoneNo() != null
                         && user.getPhoneNo().length() > 0) {
                     //Toast.makeText(SetupProfileActivity.this, "" + user.getPhoneNo() + "," + user.getEmail(), Toast.LENGTH_SHORT).show();
+                    fullNameOfUser = user.getFullName();
                     gotoDashboardActivity();
                 }
                 else
