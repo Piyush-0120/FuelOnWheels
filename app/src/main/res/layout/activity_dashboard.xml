@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
+    android:id="@+id/dashboard_main_layout"
     tools:context=".DashboardActivity">
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -45,7 +46,8 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
 
         <TableRow
             android:layout_width="match_parent"
@@ -62,7 +64,7 @@
                 android:text="@string/delivery_details"
                 android:textAlignment="center"
                 android:textColor="@color/colorSecondary"
-                android:textSize="24sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
         </TableRow>
 
@@ -79,7 +81,7 @@
                 android:text="@string/delivering_to"
                 android:textAlignment="center"
                 android:textColor="@color/colorSecondary"
-                android:textSize="20sp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/delivering_to"
@@ -91,7 +93,7 @@
                 android:text="@string/user"
                 android:textAlignment="center"
                 android:textColor="@color/colorSecondary"
-                android:textSize="20sp" />
+                android:textSize="14sp" />
         </TableRow>
 
         <TableRow
@@ -107,7 +109,7 @@
                 android:text="@string/address"
                 android:textAlignment="center"
                 android:textColor="@color/colorSecondary"
-                android:textSize="20sp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/delivery_address"
@@ -119,7 +121,35 @@
                 android:text="@string/empire_state_building_address"
                 android:textAlignment="center"
                 android:textColor="@color/colorSecondary"
-                android:textSize="20sp" />
+                android:textSize="14sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:padding="10dp"
+                android:text="@string/from"
+                android:textAlignment="center"
+                android:textColor="@color/colorSecondary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/fuel_address"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:padding="10dp"
+                android:text="@string/empire_state_building_address"
+                android:textAlignment="center"
+                android:textColor="@color/colorSecondary"
+                android:textSize="14sp" />
         </TableRow>
 
         <TableRow
@@ -135,7 +165,7 @@
                 android:text="@string/code"
                 android:textAlignment="center"
                 android:textColor="@color/colorSecondary"
-                android:textSize="20sp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/delivery_code"
@@ -147,7 +177,35 @@
                 android:text="@string/delivery_code_1"
                 android:textAlignment="center"
                 android:textColor="@color/colorSecondary"
-                android:textSize="20sp" />
+                android:textSize="14sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:padding="10dp"
+                android:text="Distance"
+                android:textAlignment="center"
+                android:textColor="@color/colorSecondary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/dashboard_table_tv_distance"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:padding="10dp"
+                android:text=""
+                android:textAlignment="center"
+                android:textColor="@color/colorSecondary"
+                android:textSize="14sp" />
         </TableRow>
 
         <TableRow
@@ -163,7 +221,7 @@
                 android:text="@string/eta"
                 android:textAlignment="center"
                 android:textColor="@color/colorSecondary"
-                android:textSize="20sp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/eta"
@@ -175,14 +233,14 @@
                 android:text=""
                 android:textAlignment="center"
                 android:textColor="@color/colorSecondary"
-                android:textSize="20sp" />
+                android:textSize="14sp" />
         </TableRow>
     </TableLayout>
 
     <Button
         android:id="@+id/next_button"
         android:layout_width="0dp"
-        android:layout_height="75dp"
+        android:layout_height="55dp"
         android:background="@color/colorPrimary"
         android:fontFamily="sans-serif-condensed-medium"
         android:text="@string/order"
