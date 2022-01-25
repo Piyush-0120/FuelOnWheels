@@ -58,8 +58,8 @@ public class FOWViewModel extends ViewModel {
         return this.fuelLocation.getValue();
     }
 
-    public void getResponseUsingCallback(Context context,GeoPoint geoPoint,OrderCallback callback){
-        repository.getResponseFromUsingCallback(context,geoPoint,callback);
+    public void getResponseUsingCallback(Context context,GeoPoint geoPoint,Order order,OrderCallback callback){
+        repository.getResponseFromUsingCallback(context,geoPoint,order,callback);
     }
 
 

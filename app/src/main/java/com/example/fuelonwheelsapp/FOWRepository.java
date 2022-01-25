@@ -1,16 +1,17 @@
 package com.example.fuelonwheelsapp;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.util.Log;
 
-import androidx.lifecycle.ViewModelProvider;
+import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.osmdroid.bonuspack.location.NominatimPOIProvider;
 import org.osmdroid.bonuspack.location.POI;
@@ -35,10 +36,15 @@ public class FOWRepository {
     private GeoPoint userCoordinates;
     private GeoPoint fuelCoordinates;
 
+    private final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+    private final DatabaseReference rootReference = FirebaseDatabase.getInstance().getReference();
+    private final DatabaseReference profileReference = rootReference.child("users").child(firebaseUser.getUid());
+    private final DatabaseReference orderReference = rootReference.child("orderTree");
+
     FOWRepository(){
     }
 
-    public void getResponseFromUsingCallback(Context context,GeoPoint geoPoint,OrderCallback orderCallback){
+    public void getResponseFromUsingCallback(Context context,GeoPoint geoPoint,Order order,OrderCallback orderCallback){
         Response response = new Response();
         FOWRepository.this.context = context;
         FOWRepository.this.userCoordinates=geoPoint;
@@ -49,17 +55,19 @@ public class FOWRepository {
         }
         else {
             Log.d("FOWRepository", "getResponseFromUsingCallback: About to enter the FindNearFuelTask");
-            new FindNearFuelTask(orderCallback,response).execute(geoPoint);
+            new FindNearFuelTask(orderCallback,response,order).execute(geoPoint);
         }
     }
 
     private class FindNearFuelTask extends AsyncTask<GeoPoint, Integer, ArrayList<POI>> {
         public OrderCallback orderCallback=null;
         public Response response=null;
+        public Order order=null;
 
-        public FindNearFuelTask(OrderCallback callback,Response response1){
+        public FindNearFuelTask(OrderCallback callback,Response response1,Order order1){
             orderCallback=callback;
             response = response1;
+            order = order1;
         }
 
         @Override
@@ -95,6 +103,8 @@ public class FOWRepository {
                 POI poi = pois.get(0);
                 FOWRepository.this.fuelCoordinates = poi.mLocation;
                 FOWRepository.this.fuelLocation = poi.mDescription;
+                order.setFuelLocation(poi.mDescription);
+
                 Log.d("FOWRepository", "onPostExecute: Successfully found the nearest POI");
                 //orderCallback.onResponse(response);
                 buildRoad(userCoordinates, fuelCoordinates,response);
@@ -105,7 +115,7 @@ public class FOWRepository {
             ArrayList<GeoPoint> waypoints = new ArrayList<>();
             waypoints.add(userGeoPoint);
             waypoints.add(fuelGeoPoint);
-            new RouteTask(orderCallback,response).execute(waypoints);
+            new RouteTask(orderCallback,response,order).execute(waypoints);
         }
     }
 
@@ -113,9 +123,12 @@ public class FOWRepository {
     {
         public OrderCallback orderCallback=null;
         public Response response=null;
-        public RouteTask(OrderCallback callback, Response response1){
+        public Order order=null;
+
+        public RouteTask(OrderCallback callback, Response response1,Order order1){
             orderCallback=callback;
             response =response1;
+            order = order1;
         }
         @SafeVarargs
         @Override
@@ -131,16 +144,69 @@ public class FOWRepository {
             response.address = fuelLocation;
             response.fuelCoordinates = fuelCoordinates;
             response.road = road;
+
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.getDefault());
             String currentDateandTime = sdf.format(new Date());
             String orderId =currentDateandTime+FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().substring(3);
-            response.orderId = "O"+orderId;
+            orderId = "O"+orderId;
+            sdf = new SimpleDateFormat("dd-MM-yyyy|HH:mm:ss:SSS", Locale.getDefault());
+            String dateTime = sdf.format(new Date());
+            response.orderId = orderId;
+            order.setDateTime(dateTime);
+            order.setOrderId(orderId);
+            order.setUserId(firebaseUser.getUid());
+
             Log.d("FOWRepository", "onPostExecute: orderId"+orderId);
-            // TODO : save all the details to DB
-            orderCallback.onResponse(response);
+            // saving Data to DB
+            saveOrderData(orderCallback,order,response);
         }
     }
+    private void saveOrderData(OrderCallback orderCallback, Order order, Response response) {
+        String orderId = order.getOrderId();
+        order.setOrderId(null);
+        orderReference.child(orderId).setValue(order)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        response.orderSavedToDatabase = true;
+                        saveOrderHistoryToProfile(orderCallback,orderId,response);
+                        Log.d("FOWRepository","Order Saved to DB successfully");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        response.orderSavedToDatabase = false;
+                        response.exception = e.getMessage();
+                        orderCallback.onResponse(response);
+                        Log.d("FOWRepository",""+e.getMessage());
+                    }
+                });
+    }
 
+    private void saveOrderHistoryToProfile(OrderCallback orderCallback, String orderId, Response response) {
+        String userId = firebaseUser.getUid();
+        String status = "Confirm";
+        profileReference.child("orders").child(orderId).setValue(status)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        response.orderSavedToDatabase = true;
+                        Log.d("FOWRepository", "OrderHistory Saved to Profile successfully");
+                        orderCallback.onResponse(response);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        response.orderSavedToDatabase = false;
+                        response.exception = e.getMessage();
+                        orderCallback.onResponse(response);
+                        Log.d("FOWRepository", "" + e.getMessage());
+                    }
+                });
+    }
 }
+
 
 

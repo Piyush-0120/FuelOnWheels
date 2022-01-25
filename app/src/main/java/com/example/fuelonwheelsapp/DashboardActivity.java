@@ -113,9 +113,20 @@ public class DashboardActivity extends AppCompatActivity {
                                 //viewModel.setOrderPlaced(true);
                                 break;
                             case 2:
+                                // TODO : Improve the Initialization
+                                Order order = new Order();
+                                order.setnDiesel(viewModel.getDieselQuantInt().toString());
+                                order.setnPetrol(viewModel.getPetrolQuantInt().toString());
+                                order.setDeliveryCharge("50");
+                                order.setDieselPrice("94");
+                                order.setPetrolPrice("100");
+                                order.setTotalAmount(String.valueOf((viewModel.getDieselQuantInt()*94+viewModel.getPetrolQuantInt()*100+50)));
+                                order.setPaymentMethod("COD");
+                                order.setUserLocation(viewModel.getOrderLocation());
                                 progressDialog.show();
-                                //findNearestFuel();
-                                viewModel.getResponseUsingCallback(getApplicationContext(),viewModel.getUserGeoPoint(), new OrderCallback() {
+
+                                //findNearestFuel
+                                viewModel.getResponseUsingCallback(getApplicationContext(),viewModel.getUserGeoPoint(),order, new OrderCallback() {
                                     @Override
                                     public void onResponse(Response response) {
                                         progressDialog.dismiss();
@@ -284,6 +295,7 @@ public class DashboardActivity extends AppCompatActivity {
 //        // permissions this app might request.
 //    }
 
+    /*
     private void requestPermissions() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -353,6 +365,7 @@ public class DashboardActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
         }
     }
+     */
 
 
     @Override

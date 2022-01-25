@@ -25,7 +25,7 @@ public class ProfileRepository {
 
     ProfileRepository(){
         Log.d("ProfileRepository",firebaseUser.getUid());
-        Log.d("ProfileRepository",profileReference.toString());
+        //Log.d("ProfileRepository",profileReference.toString());
     }
 
 

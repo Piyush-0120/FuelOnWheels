@@ -9,4 +9,5 @@ public class Response {
     public GeoPoint fuelCoordinates;
     public Road road;
     public String orderId;
+    public Boolean orderSavedToDatabase;
 }
