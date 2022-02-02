@@ -1,4 +1,4 @@
-package com.example.fuelonwheelsapp;
+package com.example.fuelonwheelsapp.profile.orders;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
@@ -17,7 +17,7 @@ public class Order {
     private String paymentMethod;
     private String totalAmount;
 
-    Order(){
+    public Order(){
         // default constructor
     }
     Order(String orderId, String dateTime, String userCoordinates, String fuelCoordinates, String userLocation, String fuelLocation, String petrolPrice, String dieselPrice, String nDiesel, String nPetrol, String deliveryCharge, String paymentMethod, String totalAmount){

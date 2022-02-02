@@ -1,4 +1,4 @@
-package com.example.fuelonwheelsapp;
+package com.example.fuelonwheelsapp.repositories;
 
 
 import android.util.Log;
@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.fuelonwheelsapp.dashboard.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,13 +24,13 @@ public class ProfileRepository {
     private final DatabaseReference profileReference = rootReference.child("users").child(firebaseUser.getUid());
     private User user;
 
-    ProfileRepository(){
+    public ProfileRepository(){
         Log.d("ProfileRepository",firebaseUser.getUid());
         //Log.d("ProfileRepository",profileReference.toString());
     }
 
 
-    MutableLiveData<User> getResponseFromDatabase(){
+    public MutableLiveData<User> getResponseFromDatabase(){
         MutableLiveData<User> mutableLiveData = new MutableLiveData<>();
         profileReference.addValueEventListener(new ValueEventListener() {
             @Override

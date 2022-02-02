@@ -1,16 +1,17 @@
-package com.example.fuelonwheelsapp;
-
-import android.util.Log;
+package com.example.fuelonwheelsapp.viewModels;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
+
+import com.example.fuelonwheelsapp.dashboard.User;
+import com.example.fuelonwheelsapp.repositories.ProfileRepository;
 
 public class UserViewModel extends ViewModel {
 
     ProfileRepository repository = new ProfileRepository();
     public LiveData<Boolean> dataSavedSuccessfully;
 
-    LiveData<User> getResponseAsUserProfile(){
+    public LiveData<User> getResponseAsUserProfile(){
         //Log.d("UserViewModel",repository.getResponseFromDatabase().getValue().getEmail());
         return repository.getResponseFromDatabase();
     }

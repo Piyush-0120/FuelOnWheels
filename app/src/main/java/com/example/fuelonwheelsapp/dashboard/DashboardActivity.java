@@ -1,9 +1,8 @@
-package com.example.fuelonwheelsapp;
+package com.example.fuelonwheelsapp.dashboard;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -11,17 +10,11 @@ import androidx.navigation.NavDestination;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
-import android.Manifest;
-import android.app.Fragment;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -29,20 +22,21 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.fuelonwheelsapp.viewModels.FOWViewModel;
+import com.example.fuelonwheelsapp.R;
+import com.example.fuelonwheelsapp.interfaces.OrderCallback;
+import com.example.fuelonwheelsapp.profile.orders.Order;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.snackbar.Snackbar;
-
-import org.osmdroid.bonuspack.routing.Road;
-import org.osmdroid.util.GeoPoint;
 
 
 import java.util.Locale;
 
 public class DashboardActivity extends AppCompatActivity {
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private static final int PERMISSION_REQUEST_ACCESS_COARSE_LOCATION = 2;
     private static final int PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 3;
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 4;
-    private static final String TAG = "DashboardActivity.java";
+    private static final String TAG = "DashboardActivity";
 
     private int homeState;
     private Button nextButton;
@@ -51,7 +45,6 @@ public class DashboardActivity extends AppCompatActivity {
     private FOWViewModel viewModel;
     private ProgressDialog progressDialog;
     private View mLayout;
-    private final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private TextView address;
     private TextView fueladdress;
     private TextView dashboard_tv_distance;
@@ -231,6 +224,16 @@ public class DashboardActivity extends AppCompatActivity {
                         getSupportFragmentManager().popBackStack("order_setup", FragmentManager.POP_BACK_STACK_INCLUSIVE);
                         homeState = 0;
                         updateNxtBtn();
+
+                        if(destination.getId()==R.id.orderListFragment || destination.getId()==R.id.orderDetailFragment
+                        || destination.getId()==R.id.accountFragment || destination.getId()==R.id.accountEditFragment
+                        || destination.getId()==R.id.aboutUsFragment || destination.getId()==R.id.paymentSetUpFragment){
+                            bottomNavigationView.setVisibility(View.GONE);
+                        }
+                        else{
+                            bottomNavigationView.setVisibility(View.VISIBLE);
+                        }
+
                     }
                 });
             NavigationUI.setupWithNavController(bottomNavigationView,navController);

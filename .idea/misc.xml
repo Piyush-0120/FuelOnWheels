@@ -13,16 +13,28 @@
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/drawable/circle.xml" value="0.1" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/drawable/ic_baseline_settings_24.xml" value="0.134375" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/drawable/ic_launcher_background.xml" value="0.21145833333333333" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout-v24/fragment_order_detail.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_dashboard.xml" value="0.264" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_main.xml" value="0.4" />
-        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_setup_profile.xml" value="0.264" />
-        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_sign_in.xml" value="0.1" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_setup_profile.xml" value="0.20233463035019456" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/activity_sign_in.xml" value="0.2" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/data_placeholder_layout.xml" value="0.23278985507246377" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_about_us.xml" value="0.24547101449275363" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_account.xml" value="0.2463768115942029" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_account_edit.xml" value="0.24547101449275363" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_account_item.xml" value="0.2" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_account_list.xml" value="0.2463768115942029" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_home.xml" value="0.264" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_order.xml" value="0.23854166666666668" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_order_detail.xml" value="0.264" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_order_list.xml" value="0.4" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_payment.xml" value="0.23854166666666668" />
-        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_profile.xml" value="0.1983695652173913" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_payment_set_up.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_profile.xml" value="0.264" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_settings.xml" value="0.1983695652173913" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/fragment_thank_you.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/order_item.xml" value="0.264" />
+        <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/layout/profile_item.xml" value="0.25833333333333336" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.2361111111111111" />
         <entry key="..\:/Users/LEGION/AndroidStudioProjects/FuelOnWheelsApp/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.21145833333333333" />
         <entry key="..\:/Users/sayan/AndroidStudioProjects/FuelOnWheels/app/src/main/res/layout/activity_dashboard.xml" value="0.176" />

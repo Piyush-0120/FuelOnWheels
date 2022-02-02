@@ -1,4 +1,4 @@
-package com.example.fuelonwheelsapp;
+package com.example.fuelonwheelsapp.dashboard;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorSecondary"
     android:gravity="center"
-    tools:context=".ThankYouFragment">
+    tools:context=".dashboard.ThankYouFragment">
 
     <androidx.cardview.widget.CardView
         android:layout_width="340dp"

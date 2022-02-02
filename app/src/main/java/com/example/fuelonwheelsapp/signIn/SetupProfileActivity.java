@@ -1,6 +1,5 @@
-package com.example.fuelonwheelsapp;
+package com.example.fuelonwheelsapp.signIn;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -9,17 +8,16 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.fuelonwheelsapp.dashboard.DashboardActivity;
+import com.example.fuelonwheelsapp.dashboard.User;
 import com.example.fuelonwheelsapp.databinding.ActivitySetupProfileBinding;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.fuelonwheelsapp.viewModels.UserViewModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 public class SetupProfileActivity extends AppCompatActivity {
 
@@ -103,7 +101,7 @@ public class SetupProfileActivity extends AppCompatActivity {
     }
 
     private void gotoDashboardActivity() {
-        Intent intent = new Intent(SetupProfileActivity.this,DashboardActivity.class);
+        Intent intent = new Intent(SetupProfileActivity.this, DashboardActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra("fullName",fullNameOfUser);
         startActivity(intent);

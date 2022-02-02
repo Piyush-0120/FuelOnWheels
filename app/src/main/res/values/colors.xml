@@ -13,6 +13,7 @@
     <color name="colorSecondary">#ffffff</color>
     <color name="colorTertiary">#E6E8E6</color>
     <color name="fowGray">#adb6bc</color>
+    <color name="red">#E91E63</color>
 
     <!--Setup Profile-->
     <color name="darkTextColor">#020000</color>

@@ -1,4 +1,4 @@
-package com.example.fuelonwheelsapp;
+package com.example.fuelonwheelsapp.dashboard;
 
 import android.os.Bundle;
 
@@ -12,6 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import com.example.fuelonwheelsapp.viewModels.FOWViewModel;
+import com.example.fuelonwheelsapp.R;
 
 /**
  * A simple {@link Fragment} subclass.

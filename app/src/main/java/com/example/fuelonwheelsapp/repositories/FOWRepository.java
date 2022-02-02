@@ -1,17 +1,27 @@
-package com.example.fuelonwheelsapp;
+package com.example.fuelonwheelsapp.repositories;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
+import com.example.fuelonwheelsapp.dashboard.Response;
+import com.example.fuelonwheelsapp.dashboard.User;
+import com.example.fuelonwheelsapp.interfaces.LoadOrderListCallback;
+import com.example.fuelonwheelsapp.interfaces.OrderCallback;
+import com.example.fuelonwheelsapp.profile.orders.Order;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.osmdroid.bonuspack.location.NominatimPOIProvider;
 import org.osmdroid.bonuspack.location.POI;
@@ -26,9 +36,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
-interface OrderCallback{
-    public void onResponse(Response response);
-}
 public class FOWRepository {
     private Context context;
     private String fuelLocation;
@@ -36,15 +43,16 @@ public class FOWRepository {
     private GeoPoint userCoordinates;
     private GeoPoint fuelCoordinates;
 
+
     private final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     private final DatabaseReference rootReference = FirebaseDatabase.getInstance().getReference();
     private final DatabaseReference profileReference = rootReference.child("users").child(firebaseUser.getUid());
     private final DatabaseReference orderReference = rootReference.child("orderTree");
 
-    FOWRepository(){
+    public FOWRepository(){
     }
 
-    public void getResponseFromUsingCallback(Context context,GeoPoint geoPoint,Order order,OrderCallback orderCallback){
+    public void getResponseFromUsingCallback(Context context, GeoPoint geoPoint, Order order, OrderCallback orderCallback){
         Response response = new Response();
         FOWRepository.this.context = context;
         FOWRepository.this.userCoordinates=geoPoint;
@@ -149,9 +157,11 @@ public class FOWRepository {
             String currentDateandTime = sdf.format(new Date());
             String orderId =currentDateandTime+FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().substring(3);
             orderId = "O"+orderId;
-            sdf = new SimpleDateFormat("dd-MM-yyyy|HH:mm:ss:SSS", Locale.getDefault());
-            String dateTime = sdf.format(new Date());
             response.orderId = orderId;
+            sdf = new SimpleDateFormat("dd-MM-yyyy|HH:mm:ss:SSS", Locale.getDefault());
+
+            String dateTime = sdf.format(new Date());
+
             order.setDateTime(dateTime);
             order.setOrderId(orderId);
             order.setUserId(firebaseUser.getUid());
@@ -186,8 +196,8 @@ public class FOWRepository {
 
     private void saveOrderHistoryToProfile(OrderCallback orderCallback, String orderId, Response response) {
         String userId = firebaseUser.getUid();
-        String status = "Confirm";
-        profileReference.child("orders").child(orderId).setValue(status)
+        String status = "true";
+        profileReference.child("orders").child(orderId).setValue(true)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
@@ -205,6 +215,90 @@ public class FOWRepository {
                         Log.d("FOWRepository", "" + e.getMessage());
                     }
                 });
+    }
+
+    public void getOrderListFromDatabase(LoadOrderListCallback loadOrderListCallback){
+        ArrayList<Order> orderArrayList = new ArrayList<>();
+        ArrayList<String> finalOrderIds = new ArrayList<>();
+        ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()) {
+                    for (DataSnapshot orderSnapshot : snapshot.getChildren()) {
+                        finalOrderIds.add(orderSnapshot.getKey());
+                    }
+                    getOrderListWithDetailFromDatabase(loadOrderListCallback, finalOrderIds);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                loadOrderListCallback.onResponse(orderArrayList,error.getMessage());
+            }
+        };
+        profileReference.child("orders").addValueEventListener(valueEventListener);
+        //profileReference.child("orders").removeEventListener(valueEventListener);
+    }
+
+    private void getOrderListWithDetailFromDatabase(LoadOrderListCallback loadOrderListCallback, ArrayList<String> orderIds) {
+        ArrayList<Order> orderArrayList = new ArrayList<>();
+        final String[] exception = {null};
+        orderReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.exists()){
+                        for(String id: orderIds) {
+                            Order order = snapshot.child(id).getValue(Order.class);
+                            if(order!=null){
+                                order.setOrderId(id);
+                                orderArrayList.add(order);
+                            }
+                        }
+                        loadOrderListCallback.onResponse(orderArrayList, exception[0]);
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    exception[0] = error.getMessage();
+                }
+            });
+    }
+
+    public MutableLiveData<User> getUserProfileResponseFromDatabase(){
+        MutableLiveData<User> mutableLiveData = new MutableLiveData<>();
+        final User[] user = {new User()};
+        profileReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    user[0] = snapshot.getValue(User.class);
+                }
+                mutableLiveData.setValue(user[0]);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+        return mutableLiveData;
+    }
+    public LiveData<Boolean> updateUserData(String field,String data){
+        MutableLiveData<Boolean> booleanMutableLiveData = new MutableLiveData<>();
+        String userId = firebaseUser.getUid();
+        profileReference.child(field).setValue(data)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        booleanMutableLiveData.setValue(true);
+                        Log.d("FOWRepository","Updated successfully");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        booleanMutableLiveData.setValue(false);
+                        Log.d("FOWRepository",""+e.getMessage());
+                    }
+                });
+        return booleanMutableLiveData;
     }
 }
 

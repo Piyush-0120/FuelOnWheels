@@ -1,4 +1,4 @@
-package com.example.fuelonwheelsapp;
+package com.example.fuelonwheelsapp.signIn;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -51,7 +51,7 @@ public class SignInActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         if(firebaseAuth.getCurrentUser()!=null){
-            Intent intent = new Intent(SignInActivity.this,SetupProfileActivity.class);
+            Intent intent = new Intent(SignInActivity.this, SetupProfileActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }

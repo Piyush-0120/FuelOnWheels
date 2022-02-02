@@ -1,10 +1,16 @@
-package com.example.fuelonwheelsapp;
+package com.example.fuelonwheelsapp.viewModels;
 
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
+import com.example.fuelonwheelsapp.dashboard.User;
+import com.example.fuelonwheelsapp.interfaces.LoadOrderListCallback;
+import com.example.fuelonwheelsapp.interfaces.OrderCallback;
+import com.example.fuelonwheelsapp.profile.orders.Order;
+import com.example.fuelonwheelsapp.repositories.FOWRepository;
 
 import org.osmdroid.bonuspack.routing.Road;
 import org.osmdroid.util.GeoPoint;
@@ -22,6 +28,9 @@ public class FOWViewModel extends ViewModel {
     private final MutableLiveData<Boolean> buildRoad = new MutableLiveData<>();
     private final MutableLiveData<Road> road = new MutableLiveData<>();
     private final MutableLiveData<Boolean> delivered = new MutableLiveData<>();
+    private final MutableLiveData<Order> order = new MutableLiveData<>();
+    private final MutableLiveData<User> user = new MutableLiveData<>();
+
 
     public GeoPoint getUserGeoPoint(){
         return userLocation.getValue();
@@ -58,12 +67,21 @@ public class FOWViewModel extends ViewModel {
         return this.fuelLocation.getValue();
     }
 
-    public void getResponseUsingCallback(Context context,GeoPoint geoPoint,Order order,OrderCallback callback){
+    public void getResponseUsingCallback(Context context, GeoPoint geoPoint, Order order, OrderCallback callback){
         repository.getResponseFromUsingCallback(context,geoPoint,order,callback);
     }
 
+    public void getResponseAfterFetchingOrderList(LoadOrderListCallback callback){
+        repository.getOrderListFromDatabase(callback);
+    }
 
+    public LiveData<User> getResponseAsUserProfile(){
+        return repository.getUserProfileResponseFromDatabase();
+    }
 
+    public LiveData<Boolean> updateUserProfile(String field,String data){
+        return repository.updateUserData(field, data);
+    }
 
     public LiveData<GeoPoint> getFuelCoordinates() {
         return fuelCoordinates;
@@ -91,6 +109,20 @@ public class FOWViewModel extends ViewModel {
     }
     public void setDelivered(Boolean b){
         this.delivered.setValue(b);
+    }
+
+    public MutableLiveData<Order> getOrder() {
+        return order;
+    }
+    public void setOrder(Order order){
+        this.order.setValue(order);
+    }
+
+    public MutableLiveData<User> getUser() {
+        return user;
+    }
+    public void setUser(User user){
+        this.user.setValue(user);
     }
 }
 
