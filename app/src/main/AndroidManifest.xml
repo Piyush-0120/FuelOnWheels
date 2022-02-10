@@ -49,12 +49,10 @@
         <activity
             android:name=".signIn.SignInActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden"
             android:exported="false" />
         <activity
             android:name=".splashScreen.MainActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
