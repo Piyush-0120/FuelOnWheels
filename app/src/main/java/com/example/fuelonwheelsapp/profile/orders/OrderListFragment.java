@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.fuelonwheelsapp.viewModels.FOWViewModel;
 import com.example.fuelonwheelsapp.R;
@@ -103,8 +104,10 @@ public class OrderListFragment extends Fragment {
                         }
                     }));
                 }
+                // TODO: It was throwing an error while signOut
                 else{
-                    Navigation.findNavController(view).navigate(R.id.profileFragment);
+                    if(exception.equals("ListEmpty"))
+                        Toast.makeText(view.getContext(), "You haven't placed an order yet", Toast.LENGTH_SHORT).show();
                 }
             }
         });

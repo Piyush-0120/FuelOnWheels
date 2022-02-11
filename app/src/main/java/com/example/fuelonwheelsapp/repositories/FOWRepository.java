@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class FOWRepository {
+    private static final String TAG = "FOWRepository";
     private Context context;
     private String fuelLocation;
     private String exception;
@@ -225,9 +226,13 @@ public class FOWRepository {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()) {
                     for (DataSnapshot orderSnapshot : snapshot.getChildren()) {
-                        finalOrderIds.add(orderSnapshot.getKey());
+                            Log.d(TAG, "onDataChange: ");
+                            finalOrderIds.add(orderSnapshot.getKey());
+                            getOrderListWithDetailFromDatabase(loadOrderListCallback, finalOrderIds);
                     }
-                    getOrderListWithDetailFromDatabase(loadOrderListCallback, finalOrderIds);
+                }
+                else{
+                    loadOrderListCallback.onResponse(orderArrayList,"ListEmpty");
                 }
             }
             @Override

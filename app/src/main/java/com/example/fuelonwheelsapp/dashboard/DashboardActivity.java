@@ -408,4 +408,14 @@ public class DashboardActivity extends AppCompatActivity {
                 nextButton.setText("Place Order");
         }
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 }
