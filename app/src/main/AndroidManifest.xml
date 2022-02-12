@@ -39,16 +39,20 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".SetupProfileActivity"
+            android:name=".signIn.SetupProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".DashboardActivity"
+            android:name=".dashboard.DashboardActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:exported="false" />
         <activity
-            android:name=".SignInActivity"
+            android:name=".signIn.SignInActivity"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".splashScreen.MainActivity"
+            android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

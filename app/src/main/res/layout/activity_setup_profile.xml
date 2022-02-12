@@ -10,7 +10,7 @@
     android:focusableInTouchMode="true"
     android:gravity="center"
     android:visibility="invisible"
-    tools:context=".MainActivity"
+    tools:context=".splashScreen.MainActivity"
     tools:visibility="visible">
 
     <ScrollView

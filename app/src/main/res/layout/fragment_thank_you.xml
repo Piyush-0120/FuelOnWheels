@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorSecondary"
     android:gravity="center"
-    tools:context=".ThankYouFragment">
+    tools:context=".dashboard.ThankYouFragment">
 
     <androidx.cardview.widget.CardView
         android:layout_width="340dp"
@@ -21,21 +21,23 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="20dp"
             android:text="@string/thank_you_for_placing_your_order"
+            android:textColor="#000000"
             android:textSize="35sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="280dp"
             android:fontFamily="sans-serif-condensed-medium"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:text="@string/you_will_shortly_receive_the_details_of_order_and_delivery_person_through_email_sms"
+            android:textColor="@color/colorPrimary"
             android:textSize="20sp" />
     </androidx.cardview.widget.CardView>
 
