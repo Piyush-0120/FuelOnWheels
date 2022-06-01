@@ -15,7 +15,7 @@ import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int SPLASH_SCREEN = 5000;
+    private static final int SPLASH_SCREEN = 4000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
